@@ -97,6 +97,9 @@ python scripts/prepare_data.py --config configs/base_config.yaml
 ### 3. Training
 
 ```bash
+# Debug Finetune Process
+python scripts/train.py --config configs/debug_config.yaml
+
 # Pre-training with PESSL
 python scripts/train.py --config configs/pretrain_config.yaml
 
