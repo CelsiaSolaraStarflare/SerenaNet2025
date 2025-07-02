@@ -1,0 +1,110 @@
+# Debug configuration for a micro-sized SerenaNet
+# Use this for quick local testing and pipeline validation.
+
+# --- Paths ---
+paths:
+  checkpoint_dir: "checkpoints/debug"
+  log_dir: "logs/debug"
+
+# --- Data ---
+data:
+  datasets:
+    train:
+      type: "common_voice"
+      root_dir: "data/cv-corpus-17.0-2024-03-15/en"
+      manifest_file: "data/common_voice_train.json"
+    val:
+      type: "common_voice"
+      root_dir: "data/cv-corpus-17.0-2024-03-15/en"
+      manifest_file: "data/common_voice_val.json"
+  
+  preprocessing:
+    sample_rate: 16000
+    n_mels: 128
+    hop_length: 160
+    win_length: 400
+
+# --- Phoneme Mapping ---
+phoneme_mapping:
+  language: 'en'
+  vocab_size: 41
+
+# --- Model ---
+model:
+  phoneme_vocab_size: 41 # From PhonemeMapper
+  use_pessl: true
+  use_car: true
+  
+  # Sub-module configurations
+  athm:
+    mamba_hidden_dim: 256
+    mamba_layers: 4
+    mamba_d_state: 16
+    mamba_d_conv: 4
+  
+  transformer:
+    d_model: 512
+    nhead: 8
+    num_layers: 6
+    dim_feedforward: 2048
+    dropout: 0.1
+    max_len: 5000
+
+  car:
+    mamba_hidden_dim: 256
+    mamba_layers: 4
+    mamba_d_state: 16
+    mamba_d_conv: 4
+  
+  pessl:
+    num_clusters: 512
+    # Add other PESSL params if needed
+
+# --- Training ---
+training:
+  mode: "finetune"  # Changed from "pretrain" to enable CTC loss
+  epochs: 1
+  batch_size: 4
+  learning_rate: 1e-4
+  weight_decay: 1e-5
+  accum_steps: 1
+  gradient_clip: 1.0
+  
+  optimizer:
+    type: "adamw"
+    betas: [0.9, 0.999]
+    eps: 1e-8
+  
+  scheduler:
+    type: "cosine"
+    eta_min: 1e-6
+
+  # Loss weights
+  lambda_pessl: 0.1
+  lambda_car: 0.1
+
+# --- Logging ---
+logging:
+  log_dir: "logs/debug"
+  project_name: "serenanet-debug"
+  use_wandb: false
+  save_interval: 1  # Save checkpoint every epoch
+  log_level: "INFO"
+  log_file: "logs/debug/training.log"
+
+# ------------------------------------------------------------------
+# Decoder Configuration
+# ------------------------------------------------------------------
+decoder:
+  type: "beam"        # "greedy" or "beam"
+  beam_width: 75      # A solid beam width for decoding without a heavy LM
+  
+  # --- Language Model Configuration ---
+  # Using an external LM is disabled for a lighter, faster decoder.
+  # To enable, set lm_type to "gpt2" or "kenlm" and provide lm_path.
+  lm_type: null     # Set to null to disable
+  lm_path: null     # No model path needed
+  
+  # Tuning parameters (less important without an LM)
+  alpha: 0.0
+  beta: 0.0 

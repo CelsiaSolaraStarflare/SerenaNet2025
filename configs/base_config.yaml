@@ -1,0 +1,120 @@
+# Base configuration for SerenaNet
+model:
+  name: "serenanet"
+  phoneme_vocab_size: 41
+  
+  # ATHM configuration
+  athm:
+    in_channels: 128
+    out_channels: 512
+    l2_lambda: 0.01
+    kernel_sizes: [1, 2, 4]
+    strides: [1, 2, 4]
+  
+  # Transformer configuration
+  transformer:
+    d_model: 512
+    nhead: 8
+    num_layers: 6
+    dim_feedforward: 2048
+    dropout: 0.1
+    max_len: 5000
+  
+  # CAR configuration
+  car:
+    input_dim: 512
+    hidden_dim: 256
+    state_dim: 16
+    output_dim: 41
+    l2_lambda: 0.01
+  
+  # PESSL configuration
+  pessl:
+    num_clusters: 100
+    mask_prob: 0.1
+
+# Data configuration
+data:
+  # Core audio parameters (kept at top level for validation)
+  sample_rate: 16000
+  n_mels: 128
+  win_length: 400  # 25ms at 16kHz
+  hop_length: 160  # 10ms
+  f_min: 0
+  f_max: 8000
+
+  # Preprocessing section expected by SpectrogramProcessor
+  preprocessing:
+    sample_rate: 16000
+    n_mels: 128
+    win_length: 400
+    hop_length: 160
+    f_min: 0
+    f_max: 8000
+
+  # SpecAugment settings
+  spec_augment:
+    freq_mask_num: 2
+    time_mask_num: 2
+    freq_mask_width: 27
+    time_mask_width: 100
+
+# Training configuration
+training:
+  batch_size: 8
+  learning_rate: 1e-4
+  epochs: 50
+  warmup_steps: 10000
+  weight_decay: 1e-4
+  gradient_clip: 1.0
+  
+  # Loss weights
+  lambda_pessl: 0.1
+  lambda_car: 0.1
+  
+  # Optimizer
+  optimizer:
+    type: "adamw"
+    betas: [0.9, 0.999]
+    eps: 1e-8
+  
+  # Scheduler
+  scheduler:
+    type: "linear_warmup"
+    warmup_steps: 10000
+    total_steps: 100000
+
+# Evaluation configuration
+evaluation:
+  beam_size: 5
+  length_penalty: 0.6
+  decode_method: "greedy"  # or "beam_search"
+
+# Logging configuration
+logging:
+  log_dir: "logs"
+  log_level: "INFO"
+  save_interval: 1000
+  eval_interval: 5000
+  use_wandb: true
+  project_name: "serenanet"
+
+# Paths
+paths:
+  data_dir: "data"
+  checkpoint_dir: "checkpoints"
+  log_dir: "logs"
+  cache_dir: "cache"
+
+# Device configuration
+device: "cuda"  # or "cpu"
+num_workers: 4
+pin_memory: true
+
+# Ablation study flags
+ablation:
+  no_athm: false
+  no_pessl: false
+  no_car: false
+  single_resolution_athm: false
+  car_variant: "mamba"  # "mamba", "lstm", "gru"

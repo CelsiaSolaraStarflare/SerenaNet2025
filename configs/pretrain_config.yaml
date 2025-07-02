@@ -1,0 +1,37 @@
+# Pre-training configuration for SerenaNet
+# Inherits from base_config.yaml and overrides specific parameters
+
+defaults:
+  - base_config
+
+# Override training parameters for pre-training
+training:
+  batch_size: 16
+  learning_rate: 5e-4
+  epochs: 10
+  mode: "pretrain"
+  
+  # Only use PESSL loss during pre-training
+  lambda_pessl: 1.0
+  lambda_car: 0.0
+  use_ctc_loss: false
+
+# Pre-training specific data configuration
+data:
+  datasets: ["common_voice_en"]
+  max_duration: 20.0  # seconds
+  min_duration: 1.0   # seconds
+  augmentation_prob: 0.8
+
+# Logging for pre-training
+logging:
+  experiment_name: "serenanet_pretrain"
+  save_interval: 2000
+  eval_interval: 10000
+
+# Checkpoint configuration
+checkpoint:
+  save_best: true
+  save_last: true
+  monitor: "val_pessl_loss"
+  mode: "min"

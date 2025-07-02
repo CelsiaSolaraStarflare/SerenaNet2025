@@ -1,0 +1,2 @@
+import subprocess, sys
+subprocess.run([sys.executable, 'scripts/prepare_data.py', '--dataset', 'common_voice', '--data-dir', 'data/cv-corpus-17.0-2024-03-15/en', '--output-dir', 'data', '--split', 'val']) 

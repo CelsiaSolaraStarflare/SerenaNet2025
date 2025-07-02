@@ -1,0 +1,48 @@
+# Fine-tuning configuration for SerenaNet
+# Inherits from base_config.yaml and overrides specific parameters
+
+defaults:
+  - base_config
+
+# Override training parameters for fine-tuning
+training:
+  batch_size: 8
+  learning_rate: 1e-4
+  epochs: 30
+  mode: "finetune"
+  
+  # Use all loss components during fine-tuning
+  lambda_pessl: 0.1
+  lambda_car: 0.1
+  use_ctc_loss: true
+  
+  # Load pre-trained checkpoint
+  pretrained_checkpoint: "checkpoints/pretrain_best.pt"
+  freeze_athm: false
+  freeze_transformer: false
+
+# Fine-tuning specific data configuration
+data:
+  datasets: ["common_voice_sw", "librispeech"]
+  max_duration: 16.0  # seconds
+  min_duration: 0.5   # seconds
+  augmentation_prob: 0.6
+
+# Logging for fine-tuning
+logging:
+  experiment_name: "serenanet_finetune"
+  save_interval: 1000
+  eval_interval: 2000
+
+# Checkpoint configuration
+checkpoint:
+  save_best: true
+  save_last: true
+  monitor: "val_wer"
+  mode: "min"
+
+# Early stopping
+early_stopping:
+  patience: 5
+  min_delta: 0.01
+  monitor: "val_wer"
